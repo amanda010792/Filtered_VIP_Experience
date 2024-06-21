@@ -29,7 +29,11 @@ Terraform v0.14.0 # any version >= v0.14.0 is OK
 3. Choose "Add API Key"
 4. Under Account, select "Service Account" and "New Service Account", naming it "<YOUR_NAME>-terraform-vip-tutorial" and click "Next"
 5. For Resource Scope, select "Cloud Resource Management" and click "Next"
-6. Optionally, add a name for the API Key and click "Create API Key and Download". Save your key details and insert them into the env.sh script
+6. Click Complete
+7. In the top right menu, select "Accounts and Access"
+8. Under "Access" select your Organization and and select "Add Role Assignment"
+9. Select the Service Account created above and grant the resource "OrganizationAdmin" rights.
+10. Optionally, add a name for the API Key and click "Create API Key and Download". Save your key details and insert them into the env.sh script
 
 ###### Source Environment Variables 
 
