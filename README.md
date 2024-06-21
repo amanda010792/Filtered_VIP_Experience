@@ -29,5 +29,16 @@ Terraform v0.14.0 # any version >= v0.14.0 is OK
 3. Choose "Add API Key"
 4. Under Account, select "Service Account" and "New Service Account", naming it "<YOUR_NAME>-terraform-vip-tutorial" and click "Next"
 5. For Resource Scope, select "Cloud Resource Management" and click "Next"
-6. Optionally, add a name for the API Key and click "Create API Key and Download". Save your key details and insert them into the env.sh script 
+6. Optionally, add a name for the API Key and click "Create API Key and Download". Save your key details and insert them into the env.sh script
+
+###### Source Environment Variables 
+
+Once you have added the API Key and Secret you created above to your env.sh script, run the following command to source the variables: 
+```
+source env.sh
+```
+
+## Run Remaining Lab 
+
+Once your prerequisites are complete, navigate to the ksql and/or flink directories to run the tutorial(s) of choice. 
 
