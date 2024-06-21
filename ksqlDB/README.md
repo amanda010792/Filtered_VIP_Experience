@@ -115,7 +115,7 @@ You can also try describe ratings extended; to see more technical information ab
 
 Register the USERS data as a KSQL stream, sourced from the 'users' topic.        
 ```
-create stream users with (kafka_topic='users', value_format='json_sr');
+create stream users with (kafka_topic='users', value_format='avro');
 ```
 
 By default, all Kafka client applications when they start up will consume messages which arrive in their input topics from that moment forwards. Older records in the topic are not consumed. We can control this behavior though by setting a configuration property, called 'auto.offset.reset'. Change auto.offset.reset to 'Earliest' through the UI. If you are using the CLI, you can do this with the command:     
