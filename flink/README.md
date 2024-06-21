@@ -1,8 +1,8 @@
 ## Set Up Tutorial Resources 
 In the setup of the workshop you will be provisioning the following resources: 
-- An environment called "vip_dev_ksql_env"
+- An environment called "vip_dev_flink_env"
 - A Kafka cluster 
-- A ksqlDB cluster 
+- A Flink compute pool 
 - Two topics 
 - Two Datagen Source connectors to simulate mock data in the topics you created. 
 - Necessary service accounts, API keys and ACLs. 
@@ -17,7 +17,7 @@ Apply terraform changes to deploy instructor environment
 ```
 terraform apply
 ```
-# ksqlDB Workshop 
+# Flink Workshop 
 
 ## Introduction 
 
