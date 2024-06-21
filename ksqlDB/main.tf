@@ -58,26 +58,26 @@ resource "confluent_schema_registry_cluster" "essentials" {
 }
 
 # create a service account called topic manager 
-resource "confluent_service_account" "topic-manager" {
-  display_name = "topic-manager"
+resource "confluent_service_account" "ksql-topic-manager" {
+  display_name = "ksql-topic-manager"
   description  = "Service account to manage Kafka cluster topics"
 }
 
 # create a role binding for topic manager service account (created above) that has cloud cluster admin access to basic cluster (created above)
-resource "confluent_role_binding" "topic-manager-kafka-cluster" {
-  principal   = "User:${confluent_service_account.topic-manager.id}"
+resource "confluent_role_binding" "ksql-topic-manager-kafka-cluster" {
+  principal   = "User:${confluent_service_account.ksql-topic-manager.id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.basic.rbac_crn
 }
 
 # create an api key for the topic manager service account (created above) 
-resource "confluent_api_key" "topic-manager-kafka-api-key" {
-  display_name = "topic-manager-kafka-api-key"
-  description  = "Kafka API Key that is owned by 'topic-manager' service account"
+resource "confluent_api_key" "ksql-topic-manager-kafka-api-key" {
+  display_name = "ksql-topic-manager-kafka-api-key"
+  description  = "Kafka API Key that is owned by 'ksql-topic-manager' service account"
   owner {
-    id          = confluent_service_account.topic-manager.id
-    api_version = confluent_service_account.topic-manager.api_version
-    kind        = confluent_service_account.topic-manager.kind
+    id          = confluent_service_account.ksql-topic-manager.id
+    api_version = confluent_service_account.ksql-topic-manager.api_version
+    kind        = confluent_service_account.ksql-topic-manager.kind
   }
 
   managed_resource {
@@ -91,7 +91,7 @@ resource "confluent_api_key" "topic-manager-kafka-api-key" {
   }
 
   depends_on = [
-    confluent_role_binding.topic-manager-kafka-cluster
+    confluent_role_binding.ksql-topic-manager-kafka-cluster
   ]
 }
 
@@ -104,8 +104,8 @@ resource "confluent_kafka_topic" "ratings" {
   topic_name    = "ratings"
   rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
-    key    = confluent_api_key.topic-manager-kafka-api-key.id
-    secret = confluent_api_key.topic-manager-kafka-api-key.secret
+    key    = confluent_api_key.ksql-topic-manager-kafka-api-key.id
+    secret = confluent_api_key.ksql-topic-manager-kafka-api-key.secret
   }
 }
 
@@ -117,8 +117,8 @@ resource "confluent_kafka_topic" "users" {
   topic_name    = "users"
   rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
   credentials {
-    key    = confluent_api_key.topic-manager-kafka-api-key.id
-    secret = confluent_api_key.topic-manager-kafka-api-key.secret
+    key    = confluent_api_key.ksql-topic-manager-kafka-api-key.id
+    secret = confluent_api_key.ksql-topic-manager-kafka-api-key.secret
   }
 }
 
@@ -285,7 +285,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-data-preview-topi
 # create a connector called "ratings_source" that creates a datagen connector called "DatagenSourceConnector_ratings" using the ratings quickstart of datagen and writes to the ratings topic (depends on acls above)
 resource "confluent_connector" "ratings_source" {
   environment {
-    id = confluent_environment.ksql_workshop_env.id
+    id = confluent_environment.vip_dev_ksql_env.id
   }
   kafka_cluster {
     id = confluent_kafka_cluster.basic.id
@@ -297,7 +297,7 @@ resource "confluent_connector" "ratings_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.ratings.topic_name
-    "output.data.format"       = "JSON_SR"
+    "output.data.format"       = "AVRO"
     "quickstart"               = "RATINGS"
     "tasks.max"                = "1"
   }
@@ -314,7 +314,7 @@ resource "confluent_connector" "ratings_source" {
 # create a connector called "users_source" that creates a datagen connector called "DatagenSourceConnector_users" using the users quickstart of datagen and writes to the users topic (depends on acls above)
 resource "confluent_connector" "users_source" {
   environment {
-    id = confluent_environment.ksql_workshop_env.id
+    id = confluent_environment.vip_dev_ksql_env.id
   }
   kafka_cluster {
     id = confluent_kafka_cluster.basic.id
@@ -326,7 +326,7 @@ resource "confluent_connector" "users_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.users.topic_name
-    "output.data.format"       = "JSON_SR"
+    "output.data.format"       = "AVRO"
     "quickstart"               = "CLICKSTREAM_USERS"
     "tasks.max"                = "1"
   }
@@ -354,6 +354,16 @@ resource "confluent_role_binding" "app-ksql-kafka-cluster" {
   crn_pattern = confluent_kafka_cluster.basic.rbac_crn
 }
 
+resource "confluent_role_binding" "app-ksql-schema-registry-resource-owner" {
+  principal   = "User:${confluent_service_account.app-ksql.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = format("%s/%s", confluent_schema_registry_cluster.essentials.resource_name, "subject=*")
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 # create ksql cluster in env and cluster (created above) depending on the service account created above
 resource "confluent_ksql_cluster" "workshop_ksql_cluster" {
   display_name = "vip_ksql_cluster"
@@ -368,7 +378,9 @@ resource "confluent_ksql_cluster" "workshop_ksql_cluster" {
     id = confluent_environment.vip_dev_ksql_env.id
   }
   depends_on = [
-    confluent_role_binding.app-ksql-kafka-cluster
+    confluent_role_binding.app-ksql-kafka-cluster,
+    confluent_role_binding.app-ksql-schema-registry-resource-owner,
+    confluent_schema_registry_cluster.essentials
   ]
 }
 
