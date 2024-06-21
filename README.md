@@ -25,10 +25,9 @@ Terraform v0.14.0 # any version >= v0.14.0 is OK
 ###### Create a Cloud API Key 
 
 1. Open the Confluent Cloud Console
-2. In the top right menu, select "Cloud API Keys"
-3. Choose "Add Key" and select "Granular Access"
-4. For Service Account, select "Create a New One" and name is <YOUR_NAME>-terraform-workshop-SA
-5. Download your key
-6. In the top right menu, select "Accounts & Access", select "Access" tab
-7. Click on the organization and select "Add Role Assignment" 
-8. Select the account you created (service account) and select "Organization Admin". Click Save
+2. In the top right menu, select "API Keys"
+3. Choose "Add API Key"
+4. Under Account, select "Service Account" and "New Service Account", naming it "<YOUR_NAME>-terraform-vip-tutorial" and click "Next"
+5. For Resource Scope, select "Cloud Resource Management" and click "Next"
+6. Optionally, add a name for the API Key and click "Create API Key and Download". Save your key details and insert them into the env.sh script 
+
