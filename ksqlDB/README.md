@@ -91,7 +91,7 @@ To stop the query, press the "stop" button.
 
 Register the RATINGS data as a KSQL stream, sourced from the 'ratings' topic.   
 ```
-create stream ratings with (kafka_topic='ratings', value_format='json_sr');
+create stream ratings with (kafka_topic='ratings', value_format='avro');
 ```
 
 Notice that here we are using the Schema Registry with our json_sr-formatted data to pull in the schema of this stream automatically. If interested, you can compare the schema which ksqlDB has created here against what was registered in the Schema Registry in the Confluent Cloud Dashboard (they will be the same!) If our data were in some other format which can’t be described in the Schema Registry, such as CSV messages, then we would also need to specify each column and it’s datatype in the create statement.     
